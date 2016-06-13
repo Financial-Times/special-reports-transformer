@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/Financial-Times/tme-reader/tmereader"
 	"github.com/pborman/uuid"
 	"log"
 	"net/http"
-	"github.com/Financial-Times/tme-reader/tmereader"
 )
 
 type httpClient interface {
@@ -14,15 +14,16 @@ type httpClient interface {
 type specialReportService interface {
 	getSpecialReports() ([]specialReportLink, bool)
 	getSpecialReportByUUID(uuid string) (specialReport, bool)
+	checkConnectivity() error
 }
 
 type specialReportServiceImpl struct {
-	repository    tmereader.Repository
-	baseURL       string
-	IdMap         map[string]string
+	repository         tmereader.Repository
+	baseURL            string
+	IdMap              map[string]string
 	specialReportLinks []specialReportLink
-	taxonomyName  string
-	maxTmeRecords int
+	taxonomyName       string
+	maxTmeRecords      int
 }
 
 func newSpecialReportService(repo tmereader.Repository, baseURL string, taxonomyName string, maxTmeRecords int) (specialReportService, error) {
@@ -73,6 +74,16 @@ func (s *specialReportServiceImpl) getSpecialReportByUUID(uuid string) (specialR
 		return specialReport{}, false
 	}
 	return transformSpecialReport(content.(term), s.taxonomyName), true
+}
+
+func (s *specialReportServiceImpl) checkConnectivity() error {
+	// TODO: Can we just hit an endpoint to check if TME is available? Or do we need to make sure we get genre taxonmies back? Maybe a healthcheck or gtg endpoint?
+	// TODO: Can we use a count from our responses while actually in use to trigger a healthcheck?
+	//	_, err := s.repository.GetTmeTermsFromIndex(1)
+	//	if err != nil {
+	//		return err
+	//	}
+	return nil
 }
 
 func (s *specialReportServiceImpl) initSpecialReportsMap(terms []interface{}) {

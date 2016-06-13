@@ -1,13 +1,18 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
+	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
+	status "github.com/Financial-Times/service-status-go/httphandlers"
 	"github.com/Financial-Times/tme-reader/tmereader"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/jawher/mow.cli"
 	"github.com/rcrowley/go-metrics"
+	"github.com/sethgrid/pester"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -71,20 +76,29 @@ func main() {
 	tmeTaxonomyName := "SpecialReports"
 
 	app.Action = func() {
-		c := &http.Client{
-			Timeout: time.Duration(20 * time.Second),
-		}
+		client := getResilientClient()
 
-		transformer := new(specialReportsTransformer)
-
-		s, err := newSpecialReportService(tmereader.NewTmeRepository(c, *tmeBaseURL, *username, *password, *token, *maxRecords, *slices, tmeTaxonomyName, transformer), *baseURL, tmeTaxonomyName, *maxRecords)
+		mf := new(specialReportsTransformer)
+		s, err := newSpecialReportService(tmereader.NewTmeRepository(client, *tmeBaseURL, *username, *password, *token, *maxRecords, *slices, tmeTaxonomyName, &tmereader.AuthorityFiles{}, mf), *baseURL, tmeTaxonomyName, *maxRecords)
 		if err != nil {
-			log.Errorf("Error while creating SpecialReportService: [%v]", err.Error())
+			log.Errorf("Error while creating SectionsService: [%v]", err.Error())
 		}
+
 		h := newSpecialReportsHandler(s)
 		m := mux.NewRouter()
-		m.HandleFunc("/transformers/special-reports", h.getSpecialReports).Methods("GET")
-		m.HandleFunc("/transformers/special-reports/{uuid}", h.getSpecialReportByUUID).Methods("GET")
+
+		// The top one of these feels more correct, but the lower one matches what we have in Dropwizard,
+		// so it's what apps expect currently same as ping
+		m.HandleFunc(status.PingPath, status.PingHandler)
+		m.HandleFunc(status.PingPathDW, status.PingHandler)
+		m.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
+		m.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
+		m.HandleFunc("/__health", v1a.Handler("Sections Transformer Healthchecks", "Checks for accessing TME", h.HealthCheck()))
+		m.HandleFunc("/__gtg", h.GoodToGo)
+
+		m.HandleFunc("/transformers/specialreports", h.getSpecialReports).Methods("GET")
+		m.HandleFunc("/transformers/specialreports/{uuid}", h.getSpecialReportByUUID).Methods("GET")
+
 		http.Handle("/", m)
 
 		log.Printf("listening on %d", *port)
@@ -93,4 +107,25 @@ func main() {
 				httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), m)))
 	}
 	app.Run(os.Args)
+}
+
+func getResilientClient() *pester.Client {
+	tr := &http.Transport{
+		MaxIdleConnsPerHost: 32,
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
+	}
+	c := &http.Client{
+		Transport: tr,
+		Timeout:   time.Duration(30 * time.Second),
+	}
+	client := pester.NewExtendedClient(c)
+	client.Backoff = pester.ExponentialBackoff
+	client.MaxRetries = 5
+	client.Concurrency = 1
+
+	return client
 }
