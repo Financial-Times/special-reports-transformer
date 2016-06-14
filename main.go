@@ -81,7 +81,7 @@ func main() {
 		mf := new(specialReportsTransformer)
 		s, err := newSpecialReportService(tmereader.NewTmeRepository(client, *tmeBaseURL, *username, *password, *token, *maxRecords, *slices, tmeTaxonomyName, &tmereader.AuthorityFiles{}, mf), *baseURL, tmeTaxonomyName, *maxRecords)
 		if err != nil {
-			log.Errorf("Error while creating SectionsService: [%v]", err.Error())
+			log.Errorf("Error while creating SpecialReportService: [%v]", err.Error())
 		}
 
 		h := newSpecialReportsHandler(s)
@@ -93,7 +93,7 @@ func main() {
 		m.HandleFunc(status.PingPathDW, status.PingHandler)
 		m.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
 		m.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
-		m.HandleFunc("/__health", v1a.Handler("Sections Transformer Healthchecks", "Checks for accessing TME", h.HealthCheck()))
+		m.HandleFunc("/__health", v1a.Handler("Special Reports Transformer Healthchecks", "Checks for accessing TME", h.HealthCheck()))
 		m.HandleFunc("/__gtg", h.GoodToGo)
 
 		m.HandleFunc("/transformers/specialreports", h.getSpecialReports).Methods("GET")

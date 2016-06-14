@@ -1,5 +1,4 @@
 FROM alpine:3.3
-ADD . /special-reports-transformer/
 ADD *.go .git /special-reports-transformer/
 RUN apk add --update bash \
   && apk --update add git go bzr \
