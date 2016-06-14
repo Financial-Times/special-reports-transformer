@@ -8,17 +8,18 @@ import (
 
 func transformSpecialReport(tmeTerm term, taxonomyName string) specialReport {
 	tmeIdentifier := buildTmeIdentifier(tmeTerm.RawID, taxonomyName)
+	uuid := uuid.NewMD5(uuid.UUID{}, []byte(tmeIdentifier)).String()
 
 	return specialReport{
-		UUID:          uuid.NewMD5(uuid.UUID{}, []byte(tmeIdentifier)).String(),
-		CanonicalName: tmeTerm.CanonicalName,
-		TmeIdentifier: tmeIdentifier,
-		Type:          "Special Report",
+		UUID:                   uuid,
+		PrefLabel:              tmeTerm.CanonicalName,
+		AlternativeIdentifiers: alternativeIdentifiers{TME: []string{tmeIdentifier}, Uuids: []string{uuid}},
+		Type: "SpecialReport",
 	}
 }
 
-func buildTmeIdentifier(rawId string, tmeTermTaxonomyName string) string {
-	id := base64.StdEncoding.EncodeToString([]byte(rawId))
+func buildTmeIdentifier(rawID string, tmeTermTaxonomyName string) string {
+	id := base64.StdEncoding.EncodeToString([]byte(rawID))
 	taxonomyName := base64.StdEncoding.EncodeToString([]byte(tmeTermTaxonomyName))
 	return id + "-" + taxonomyName
 }
@@ -32,7 +33,7 @@ func (*specialReportsTransformer) UnMarshallTaxonomy(contents []byte) ([]interfa
 	if err != nil {
 		return nil, err
 	}
-	var interfaces []interface{} = make([]interface{}, len(taxonomy.Terms))
+	interfaces := make([]interface{}, len(taxonomy.Terms))
 	for i, d := range taxonomy.Terms {
 		interfaces[i] = d
 	}
@@ -40,10 +41,10 @@ func (*specialReportsTransformer) UnMarshallTaxonomy(contents []byte) ([]interfa
 }
 
 func (*specialReportsTransformer) UnMarshallTerm(content []byte) (interface{}, error) {
-	tmeTerm := term{}
-	err := xml.Unmarshal(content, &tmeTerm)
+	dummyTerm := term{}
+	err := xml.Unmarshal(content, &dummyTerm)
 	if err != nil {
 		return term{}, err
 	}
-	return tmeTerm, nil
+	return dummyTerm, nil
 }
