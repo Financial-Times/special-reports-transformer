@@ -10,21 +10,15 @@ import (
 	"strconv"
 )
 
-const space = " "
-
 type specialReportsHandler struct {
 	service specialReportService
-}
-
-type specialReportID struct {
-	id string
 }
 
 func newSpecialReportsHandler(service specialReportService) specialReportsHandler {
 	return specialReportsHandler{service: service}
 }
 
-func (h *specialReportsHandler) getCount(writer http.ResponseWriter, req *http.Request) {
+func (h *specialReportsHandler) count(writer http.ResponseWriter, req *http.Request) {
 	ids := h.service.getSpecialReportIds()
 	_, err := writer.Write([]byte(strconv.Itoa(len(ids))))
 	if err != nil {
@@ -33,7 +27,7 @@ func (h *specialReportsHandler) getCount(writer http.ResponseWriter, req *http.R
 	}
 }
 
-func (h *specialReportsHandler) getIds(writer http.ResponseWriter, req *http.Request) {
+func (h *specialReportsHandler) ids(writer http.ResponseWriter, req *http.Request) {
 	ids := h.service.getSpecialReportIds()
 	writer.Header().Add("Content-Type", "text/plain")
 	if len(ids) == 0 {
@@ -41,16 +35,14 @@ func (h *specialReportsHandler) getIds(writer http.ResponseWriter, req *http.Req
 		return
 	}
 	enc := json.NewEncoder(writer)
+	type specialReportID struct {
+		ID string `json:"id"`
+	}
 	for _, id := range ids {
-		rID := specialReportID{id: id}
+		rID := specialReportID{ID: id}
 		err := enc.Encode(rID)
 		if err != nil {
 			log.Warnf("Couldn't encode to HTTP response special report with uuid=%s %v\n", id, err)
-			continue
-		}
-		_, err = writer.Write([]byte(space))
-		if err != nil {
-			log.Warnf("Couldn't write ' ' to HTTP response for special report with uuid=%s %v\n", id, err)
 			continue
 		}
 	}

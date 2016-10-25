@@ -35,6 +35,8 @@ func newSpecialReportService(repo tmereader.Repository, baseURL string, taxonomy
 
 func (s *specialReportServiceImpl) init() error {
 	s.IDMap = make(map[string]string)
+	var links []specialReportLink
+	s.specialReportLinks = links
 	responseCount := 0
 	log.Printf("Fetching special reports from TME\n")
 	for {

@@ -1,7 +1,7 @@
-FROM alpine:3.3
+FROM alpine:3.4
 ADD *.go .git /special-reports-transformer/
 RUN apk add --update bash \
-  && apk --update add git go bzr \
+  && apk --update add git go bzr ca-certificates \
   && cd special-reports-transformer \
   && git fetch origin 'refs/tags/*:refs/tags/*' \
   && BUILDINFO_PACKAGE="github.com/Financial-Times/service-status-go/buildinfo." \
@@ -21,7 +21,8 @@ RUN apk add --update bash \
   && cd $GOPATH/src/${REPO_PATH} \
   && echo ${LDFLAGS} \
   && go build -ldflags="${LDFLAGS}" \
-  && mv special-reports-transformer /app \
-  && apk del go git bzr\
-  && rm -rf $GOPATH /var/cache/apk/*
-CMD [ "/app" ]
+  && mv special-reports-transformer /special-reports-transformer-app \
+  && apk del go git bzr \
+  && rm -rf $GOPATH /var/cache/apk/* /special-reports-transformer \
+  && mv /special-reports-transformer-app /special-reports-transformer
+CMD [ "/special-reports-transformer" ]
