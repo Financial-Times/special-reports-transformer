@@ -59,12 +59,16 @@ type dummyService struct {
 	specialreports []specialReport
 }
 
-func (s *dummyService) getCount() int {
-	return len(s.specialreports)
+func (s *dummyService) init() error {
+	return nil
 }
 
-func (s *dummyService) getIds() []string {
-	return s.specialreports
+func (s *dummyService) getSpecialReportIds() []string {
+	var ids []string
+	for _, sub := range s.specialreports {
+		ids = append(ids, sub.UUID)
+	}
+	return ids
 }
 
 func (s *dummyService) getSpecialReportsLinks() ([]specialReportLink, bool) {
