@@ -4,12 +4,7 @@ import (
 	"github.com/Financial-Times/tme-reader/tmereader"
 	"github.com/pborman/uuid"
 	"log"
-	"net/http"
 )
-
-type httpClient interface {
-	Do(req *http.Request) (resp *http.Response, err error)
-}
 
 type specialReportService interface {
 	init() error
@@ -22,7 +17,7 @@ type specialReportService interface {
 type specialReportServiceImpl struct {
 	repository         tmereader.Repository
 	baseURL            string
-	IdMap              map[string]string
+	IDMap              map[string]string
 	specialReportLinks []specialReportLink
 	taxonomyName       string
 	maxTmeRecords      int
@@ -39,7 +34,7 @@ func newSpecialReportService(repo tmereader.Repository, baseURL string, taxonomy
 }
 
 func (s *specialReportServiceImpl) init() error {
-	s.IdMap = make(map[string]string)
+	s.IDMap = make(map[string]string)
 	responseCount := 0
 	log.Printf("Fetching special reports from TME\n")
 	for {
@@ -60,8 +55,8 @@ func (s *specialReportServiceImpl) init() error {
 }
 
 func (s *specialReportServiceImpl) getSpecialReportIds() []string {
-	ids := make([]string, 0, len(s.IdMap))
-	for id := range s.IdMap {
+	ids := make([]string, 0, len(s.IDMap))
+	for id := range s.IDMap {
 		ids = append(ids, id)
 	}
 	return ids
@@ -75,11 +70,11 @@ func (s *specialReportServiceImpl) getSpecialReportsLinks() ([]specialReportLink
 }
 
 func (s *specialReportServiceImpl) getSpecialReportByUUID(uuid string) (specialReport, bool) {
-	rawId, found := s.IdMap[uuid]
+	rawID, found := s.IDMap[uuid]
 	if !found {
 		return specialReport{}, false
 	}
-	content, err := s.repository.GetTmeTermById(rawId)
+	content, err := s.repository.GetTmeTermById(rawID)
 	if err != nil {
 		return specialReport{}, false
 	}
@@ -101,7 +96,7 @@ func (s *specialReportServiceImpl) initSpecialReportsMap(terms []interface{}) {
 		t := iTerm.(term)
 		tmeIdentifier := buildTmeIdentifier(t.RawID, s.taxonomyName)
 		uuid := uuid.NewMD5(uuid.UUID{}, []byte(tmeIdentifier)).String()
-		s.IdMap[uuid] = t.RawID
+		s.IDMap[uuid] = t.RawID
 		s.specialReportLinks = append(s.specialReportLinks, specialReportLink{APIURL: s.baseURL + uuid})
 	}
 }

@@ -70,7 +70,7 @@ func (d *dummyRepo) GetTmeTermsFromIndex(startRecord int) ([]interface{}, error)
 	if startRecord > 0 {
 		return nil, d.err
 	}
-	var interfaces []interface{} = make([]interface{}, len(d.terms))
+	var interfaces = make([]interface{}, len(d.terms))
 	for i, data := range d.terms {
 		interfaces[i] = data
 	}

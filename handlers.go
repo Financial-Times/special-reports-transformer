@@ -16,7 +16,7 @@ type specialReportsHandler struct {
 	service specialReportService
 }
 
-type specialReportId struct {
+type specialReportID struct {
 	id string
 }
 
@@ -26,7 +26,11 @@ func newSpecialReportsHandler(service specialReportService) specialReportsHandle
 
 func (h *specialReportsHandler) getCount(writer http.ResponseWriter, req *http.Request) {
 	ids := h.service.getSpecialReportIds()
-	writer.Write([]byte(strconv.Itoa(len(ids))))
+	_, err := writer.Write([]byte(strconv.Itoa(len(ids))))
+	if err != nil {
+		log.Warnf("Couldn't write count to HTTP response. count=%d %v\n", len(ids), err)
+		writer.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func (h *specialReportsHandler) getIds(writer http.ResponseWriter, req *http.Request) {
@@ -38,8 +42,8 @@ func (h *specialReportsHandler) getIds(writer http.ResponseWriter, req *http.Req
 	}
 	enc := json.NewEncoder(writer)
 	for _, id := range ids {
-		rId := specialReportId{id: id}
-		err := enc.Encode(rId)
+		rID := specialReportID{id: id}
+		err := enc.Encode(rID)
 		if err != nil {
 			log.Warnf("Couldn't encode to HTTP response special report with uuid=%s %v\n", id, err)
 			continue

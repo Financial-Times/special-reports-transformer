@@ -102,11 +102,17 @@ func main() {
 		http.Handle("/", m)
 
 		log.Printf("listening on %d", *port)
-		http.ListenAndServe(fmt.Sprintf(":%d", *port),
+		err = http.ListenAndServe(fmt.Sprintf(":%d", *port),
 			httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry,
 				httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), m)))
+		if err != nil {
+			log.Errorf("Can't start up HTTP listener: %v", err)
+		}
 	}
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Errorf("Cannot start app: %v", err)
+	}
 }
 
 func getResilientClient() *pester.Client {
@@ -120,7 +126,7 @@ func getResilientClient() *pester.Client {
 	}
 	c := &http.Client{
 		Transport: tr,
-		Timeout:   time.Duration(30 * time.Second),
+		Timeout:   30 * time.Second,
 	}
 	client := pester.NewExtendedClient(c)
 	client.Backoff = pester.ExponentialBackoff
