@@ -8,7 +8,7 @@ import (
 
 type specialReportService interface {
 	init() error
-	getSpecialReportIds() ([]string)
+	getSpecialReportIds() []string
 	getSpecialReportsLinks() ([]specialReportLink, bool)
 	getSpecialReportByUUID(uuid string) (specialReport, bool)
 	checkConnectivity() error
