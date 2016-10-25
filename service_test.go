@@ -27,7 +27,7 @@ func TestGetSpecialReports(t *testing.T) {
 	for _, test := range tests {
 		repo := dummyRepo{terms: test.terms, err: test.err}
 		service, err := newSpecialReportService(&repo, test.baseURL, "Sections", 10000)
-		expectedSections, found := service.getSpecialReports()
+		expectedSections, found := service.getSpecialReportsLinks()
 		assert.Equal(test.specialreports, expectedSections, fmt.Sprintf("%s: Expected SpecialReports link incorrect", test.name))
 		assert.Equal(test.found, found)
 		assert.Equal(test.err, err)

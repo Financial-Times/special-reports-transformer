@@ -12,7 +12,9 @@ type httpClient interface {
 }
 
 type specialReportService interface {
-	getSpecialReports() ([]specialReportLink, bool)
+	init() error
+	getSpecialReportIds() ([]string)
+	getSpecialReportsLinks() ([]specialReportLink, bool)
 	getSpecialReportByUUID(uuid string) (specialReport, bool)
 	checkConnectivity() error
 }
@@ -57,7 +59,15 @@ func (s *specialReportServiceImpl) init() error {
 	return nil
 }
 
-func (s *specialReportServiceImpl) getSpecialReports() ([]specialReportLink, bool) {
+func (s *specialReportServiceImpl) getSpecialReportIds() []string {
+	ids := make([]string, 0, len(s.IdMap))
+	for id := range s.IdMap {
+		ids = append(ids, id)
+	}
+	return ids
+}
+
+func (s *specialReportServiceImpl) getSpecialReportsLinks() ([]specialReportLink, bool) {
 	if len(s.specialReportLinks) > 0 {
 		return s.specialReportLinks, true
 	}

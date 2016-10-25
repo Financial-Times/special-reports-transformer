@@ -7,18 +7,61 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
+
+const space = " "
 
 type specialReportsHandler struct {
 	service specialReportService
+}
+
+type specialReportId struct {
+	id string
 }
 
 func newSpecialReportsHandler(service specialReportService) specialReportsHandler {
 	return specialReportsHandler{service: service}
 }
 
+func (h *specialReportsHandler) getCount(writer http.ResponseWriter, req *http.Request) {
+	ids := h.service.getSpecialReportIds()
+	writer.Write([]byte(strconv.Itoa(len(ids))))
+}
+
+func (h *specialReportsHandler) getIds(writer http.ResponseWriter, req *http.Request) {
+	ids := h.service.getSpecialReportIds()
+	writer.Header().Add("Content-Type", "text/plain")
+	if len(ids) == 0 {
+		writer.WriteHeader(http.StatusOK)
+		return
+	}
+	enc := json.NewEncoder(writer)
+	for _, id := range ids {
+		rId := specialReportId{id: id}
+		err := enc.Encode(rId)
+		if err != nil {
+			log.Warnf("Couldn't encode to HTTP response special report with uuid=%s %v\n", id, err)
+			continue
+		}
+		_, err = writer.Write([]byte(space))
+		if err != nil {
+			log.Warnf("Couldn't write ' ' to HTTP response for special report with uuid=%s %v\n", id, err)
+			continue
+		}
+	}
+}
+
+func (h *specialReportsHandler) reload(writer http.ResponseWriter, req *http.Request) {
+	err := h.service.init()
+	if err != nil {
+		log.Warnf("Problem reloading terms from TME: %v", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
 func (h *specialReportsHandler) getSpecialReports(writer http.ResponseWriter, req *http.Request) {
-	obj, found := h.service.getSpecialReports()
+	obj, found := h.service.getSpecialReportsLinks()
 	writeJSONResponse(obj, found, writer)
 }
 

@@ -59,7 +59,15 @@ type dummyService struct {
 	specialreports []specialReport
 }
 
-func (s *dummyService) getSpecialReports() ([]specialReportLink, bool) {
+func (s *dummyService) getCount() int {
+	return len(s.specialreports)
+}
+
+func (s *dummyService) getIds() []string {
+	return s.specialreports
+}
+
+func (s *dummyService) getSpecialReportsLinks() ([]specialReportLink, bool) {
 	var specialReportLinks []specialReportLink
 	for _, sub := range s.specialreports {
 		specialReportLinks = append(specialReportLinks, specialReportLink{APIURL: "http://localhost:8080/transformers/specialreports/" + sub.UUID})
