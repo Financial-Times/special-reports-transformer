@@ -96,8 +96,8 @@ func main() {
 		m.HandleFunc("/__health", v1a.Handler("Special Reports Transformer Healthchecks", "Checks for accessing TME", h.HealthCheck()))
 		m.HandleFunc("/__gtg", h.GoodToGo)
 
-		m.HandleFunc("/transformers/specialreports", h.getSpecialReports).Methods("GET")
-		m.HandleFunc("/transformers/specialreports/{uuid}", h.getSpecialReportByUUID).Methods("GET")
+		m.HandleFunc("/transformers/special-reports", h.getSpecialReports).Methods("GET")
+		m.HandleFunc("/transformers/special-reports/{uuid}", h.getSpecialReportByUUID).Methods("GET")
 
 		http.Handle("/", m)
 
