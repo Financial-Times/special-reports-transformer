@@ -12,14 +12,6 @@ type alternativeIdentifiers struct {
 	Uuids []string `json:"uuids,omitempty"`
 }
 
-type specialReportVariation struct {
-	Name      string   `json:"name"`
-	Weight    string   `json:"weight"`
-	Case      string   `json:"case"`
-	Accent    string   `json:"accent"`
-	Languages []string `json:"languages"`
-}
-
 type specialReportLink struct {
 	APIURL string `json:"apiUrl"`
 }

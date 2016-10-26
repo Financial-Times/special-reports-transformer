@@ -28,13 +28,13 @@ type specialReportsTransformer struct {
 }
 
 func (*specialReportsTransformer) UnMarshallTaxonomy(contents []byte) ([]interface{}, error) {
-	taxonomy := taxonomy{}
-	err := xml.Unmarshal(contents, &taxonomy)
+	tax := taxonomy{}
+	err := xml.Unmarshal(contents, &tax)
 	if err != nil {
 		return nil, err
 	}
-	interfaces := make([]interface{}, len(taxonomy.Terms))
-	for i, d := range taxonomy.Terms {
+	interfaces := make([]interface{}, len(tax.Terms))
+	for i, d := range tax.Terms {
 		interfaces[i] = d
 	}
 	return interfaces, nil

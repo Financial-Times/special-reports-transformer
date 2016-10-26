@@ -9,8 +9,3 @@ type term struct {
 	CanonicalName string `xml:"name"`
 	RawID         string `xml:"id"`
 }
-
-type response struct {
-	Taxonomy taxonomy
-	Err      error
-}
