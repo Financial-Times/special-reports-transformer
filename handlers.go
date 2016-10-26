@@ -92,11 +92,11 @@ func writeJSONError(w http.ResponseWriter, errorMsg string, statusCode int) {
 
 func (h *specialReportsHandler) HealthCheck() v1a.Check {
 	return v1a.Check{
-		BusinessImpact:   "Unable to respond to request for the special report data from TME",
-		Name:             "Check connectivity to TME",
+		BusinessImpact:   "Won't be able to reload and republish special report concepts.",
+		Name:             "Application is down.",
 		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/specialReports-transfomer",
 		Severity:         1,
-		TechnicalSummary: "Cannot connect to TME to be able to supply special reports",
+		TechnicalSummary: "Application is down.",
 		Checker:          func() (string, error) { return "ok", nil },
 	}
 }
