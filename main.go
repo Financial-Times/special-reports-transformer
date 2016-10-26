@@ -87,8 +87,6 @@ func main() {
 		h := newSpecialReportsHandler(s)
 		m := mux.NewRouter()
 
-		// The top one of these feels more correct, but the lower one matches what we have in Dropwizard,
-		// so it's what apps expect currently same as ping
 		m.HandleFunc(status.PingPath, status.PingHandler)
 		m.HandleFunc(status.PingPathDW, status.PingHandler)
 		m.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
@@ -97,10 +95,10 @@ func main() {
 		m.HandleFunc("/__gtg", h.GoodToGo)
 
 		m.HandleFunc("/transformers/special-reports", h.getSpecialReports).Methods("GET")
-		m.HandleFunc("/transformers/special-reports/__count", h.count).Methods("GET")
-		m.HandleFunc("/transformers/special-reports/__ids", h.ids).Methods("GET")
+		m.HandleFunc("/transformers/special-reports/__count", h.getCount).Methods("GET")
+		m.HandleFunc("/transformers/special-reports/__ids", h.getIds).Methods("GET")
 		m.HandleFunc("/transformers/special-reports/__reload", h.reload).Methods("POST")
-		m.HandleFunc("/transformers/special-reports/{uuid}", h.getSpecialReportByUUID).Methods("GET")
+		m.HandleFunc("/transformers/special-reports/{uuid}", h.getSpecialReport).Methods("GET")
 
 		http.Handle("/", m)
 
