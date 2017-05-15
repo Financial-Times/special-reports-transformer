@@ -1,3 +1,6 @@
+*DECOMISSIONED*
+See [Basic TME Transformer](https://github.com/Financial-Times/basic-tme-transformer) instead
+
 # special-reports-transformer
 
 [![Circle CI](https://circleci.com/gh/Financial-Times/special-reports-transformer/tree/master.png?style=shield)](https://circleci.com/gh/Financial-Times/special-reports-transformer/tree/master)
